@@ -194,7 +194,64 @@ def comparar():
         </form>
 ''', opcoes = opcoes)
 
+@app.route('/ver',methods=['POST','GET'])
+def ver_tabela():
+    opcoes = [
+        'bebidas',
+        'vingadores',
+    ]
+    tabela_html = ""
+#informando o caminho
+    if request.method == "POST":
+        eixoX = request.form.get('eixo_x')
+        with sqlite3.connect(f'{caminho}banco01.bd') as conn:
+            df = pd.read_sql_query(f"SELECT * FROM {eixoX}",conn)
+            tabela_html = df.to_html(index=False,classes='table table-bordered')
+    #Fazendo um formulário de busca
+    return render_template_string('''
+        <h2>Busque tabela </h2>
+        <form method="POST">
+            <label for ="eixo_x"></label> Escolha Tabela:</label>
+            <select name= "eixo_x">
+                {% for opcao in opcoes %}
+                    <option value="{{opcao}}">{{opcao}}</option>
+                {% endfor %}
+            </select>
+            <br></br>
+            <input type = "submit" value="Ver Tabela">
+        </form>
+        <hr>
+        {{tabela_html|safe}}                          
+''', opcoes=opcoes, tabela_html=tabela_html)
+
+@app.route('/upload',methods = ['GET','POST'])
+def upload():
+
+    if request.method == "POST":
+        recebido = request.files['c_arquivo']
+        if not recebido:
+            return "Nenhum arquivo foi recebido"
+        dfAvengers = pd.read_csv(recebido,encoding='latin1')
+        #fazendo a conexão ao banco01
+        conn = sqlite3.connect(f'{caminho}banco01.bd')
+        #inserido a tabela no banco de dados
+        dfAvengers.to_sql("vingadores",conn,if_exists="replace",index=False)
+        #Salva "me comprometendo que eu estou mandando para o banco"
+        conn.commit()
+        conn.close()
+        return"Sucesso! Tabela vingadores no banco de dados"
+
+#criação do formulario
+    return'''
+        <h2>Upload da tabela Avengers</h2>
+        <form method="POST" enctype='multipart/form-data'>
+            <input type ='file' name='c_arquivo' accept='.csv'>
+            <input type = 'submit' value='Carregar'>
+        </form>
+ '''
+                                 
 if __name__ == '__main__':
     criarBancoDados()
     app.run(debug=True)
+
 

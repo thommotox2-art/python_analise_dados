@@ -139,6 +139,60 @@ def grafico3():
             title = "Consumo Total por Região"
         )
         return figuraGrafico3.to_html()
+    
+@app.route('/comparar',methods=['POST','GET'])
+def comparar():
+    opcoes = [
+        'beer_servings',
+        'spirit_servings',
+        'wine_servings'
+    ]
+    # EU SOU UM CONE DE VAGA
+
+    if request.method == "POST":
+        eixoX = request.form.get('eixo_x')#beer
+        eixoY = request.form.get('eixo_y')#wine
+        if eixoX == eixoY:
+            return "<marquee> Você fez besteira..escolha tabelas diferentes .... </marquee>"
+        conn = sqlite3.connect(f'{caminho}banco01.bd')
+        df = pd.read_sql_query("SELECT country, {},{} FROM bebidas".format(eixoX,eixoY), conn)
+        conn.close()
+        figuraComparar = px.scatter(
+            df,
+            x = eixoX,
+            y = eixoY,
+            title= f"Comparação entre {eixoX} VS {eixoY} "
+        )
+        figuraComparar.update_traces(
+            textposition = "top center"
+        )
+        return figuraComparar.to_html()
+        
+    return render_template_string('''
+        <h2>Comparar campos </h2>
+        <form method="POST">
+            <label for ="eixo_x"></label> Eixo x:</label>
+            <select name= "eixo_x">
+                {% for opcao in opcoes %}
+                    <option value="{{opcao}}">{{opcao}}</option>
+                {% endfor %}
+
+            </select>
+            <br></br>
+
+            <label for="eixo_y"></label> Eixo Y:</label>
+            <select name="eixo_y">
+                {% for opcao in opcoes %}
+                    <option value="{{opcao}}">{{opcao}}</option>
+                {% endfor %}
+                                  
+            </select>
+            <br></br>
+
+            <input type="submit" value="-- Comparar --">
+
+        </form>
+''', opcoes = opcoes)
 
 if __name__ == '__main__':
     criarBancoDados()

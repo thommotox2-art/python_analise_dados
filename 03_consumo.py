@@ -108,6 +108,38 @@ def grafico2():
     )
     return figuraGrafico02.to_html()
 
+@app.route("/grafico3")
+def grafico3():
+    regioes = {
+        "Europa":['France','Germany','Spain','Italy','Portugal'],
+        "Asia":['China','Japan','India','Thailand'],
+        "Africa":['Angola','Nigeria','Egypt','Algeria'],
+        "Americas":['USA','Brazil','Argentina','Mexico']
+    }
+    dados = []
+    with sqlite3.connect(f'{caminho}banco01.bd') as conn:
+        #itera sobre o dicionario, de regioes onde cada chave(região tem uma lista de paises)
+        for regiao, paises in regioes.items():
+            placeholders = ",".join([f"'{pais}'"for pais in paises])
+            query = f"""
+                SELECT SUM(total_litres_of_pure_alcohol) AS total
+                FROM bebidas
+                Where country IN ({placeholders})
+            """
+            total = pd.read_sql_query(query, conn).iloc[0,0]
+            dados.append({
+                "Região":regiao,
+                "Consumo Total": total 
+            })
+        dfRegioes = pd.DataFrame(dados)
+        figuraGrafico3 = px.pie(
+            dfRegioes,
+            names = "Região",
+            values ="Consumo Total",
+            title = "Consumo Total por Região"
+        )
+        return figuraGrafico3.to_html()
+
 if __name__ == '__main__':
     criarBancoDados()
     app.run(debug=True)

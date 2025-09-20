@@ -52,7 +52,7 @@ def init_db(): #função criada para inciar o banco de dados
 def index():
     return render_template_string(f'''
         <h1> Upload dados Economicos</h1>
-        <form action =" " method="POST" enctype="multipart/form-data">
+        <form action ="{rotas[1]} " method="POST" enctype="multipart/form-data">
                                  
             <label for="campo_selic"> Arquivo de Inadimplencia (CSV):</label>
             <input name="campo_inadimplencia" type="file" required>
@@ -65,9 +65,9 @@ def index():
         <form>
         <br><br>
         <a href="{rotas[2]}"> Consultar dados Armazenados <a/><br>
-        <a href="{rotas[3]}"> Visualizar Graficos <a/><br>
-        <a href="{rotas[4]}"> Visualizar Graficos <a/><br>
-        <a href="{rotas[5]}"> Visualizar Graficos <a/><br>
+        <a href="{rotas[3]}"> Visualizar Graficos </a><br>
+        <a href="{rotas[4]}"> Editar Inadimplencia </a><br>
+        <a href="{rotas[5]}"> Visualizar Graficos </a><br>
                                  
     ''')
 
@@ -148,10 +148,8 @@ def consultar ():
         <a href="{rotas[0]}">Voltar</a>
 ''')
 
-app.route(rotas[4],methods =['POST','GET'])
+@app.route(rotas[4],methods =['POST','GET'])
 def editar_inandimplencia():
-
-    #############################
 
     if request.method == "POST":
         mes = request.form.get('campo_mes')
@@ -176,8 +174,8 @@ def editar_inandimplencia():
             <label for="campo mes"> Mês (AAAA-MM) </label>
             <input type="text" name="campo_mes"><br>
                                    
-            <label for="campo valor"> Novo valor </label>
-            <input.type="text" name="campo_valor"><br>
+            <label for="campo_valor"> Novo valor </label>
+            <input type="text" name="campo_valor"><br>
 
             <input type="submit" value="Salvar">
         </form>
